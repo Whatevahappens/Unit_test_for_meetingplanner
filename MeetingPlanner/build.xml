@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MeetingPlanner" default="dist" basedir=".">
+    <!-- Property definitions -->
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="test.classes.dir" value="${build.dir}/test-classes"/>
+    <property name="test.reports.dir" value="${build.dir}/test-reports"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="docs.dir" value="docs"/>
+    <property name="lib.dir" value="lib"/>
+    
+    <!-- Classpath for JUnit -->
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+    
+    <!-- Classpath for tests -->
+    <path id="test.classpath">
+        <path refid="classpath"/>
+        <pathelement location="${classes.dir}"/>
+    </path>
+
+    <!-- Clean target -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${docs.dir}"/>
+    </target>
+
+    <!-- Init target -->
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${test.classes.dir}"/>
+        <mkdir dir="${test.reports.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${docs.dir}"/>
+    </target>
+
+    <!-- Compile source code -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+
+    <!-- Compile tests -->
+    <target name="compile-tests" depends="compile">
+        <javac srcdir="${src.dir}" destdir="${test.classes.dir}" includeantruntime="false">
+            <classpath refid="test.classpath"/>
+        </javac>
+    </target>
+
+    <!-- Run unit tests -->
+    <target name="test" depends="compile-tests">
+        <junit printsummary="yes" haltonfailure="no">
+            <classpath>
+                <path refid="test.classpath"/>
+                <pathelement location="${test.classes.dir}"/>
+            </classpath>
+            
+            <formatter type="plain"/>
+            <formatter type="xml"/>
+            
+            <batchtest fork="yes" todir="${test.reports.dir}">
+                <fileset dir="${test.classes.dir}">
+                    <include name="**/*Test.class"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <!-- Generate javadoc -->
+    <target name="javadoc" depends="compile">
+        <javadoc destdir="${docs.dir}" author="true" version="true" use="true" windowtitle="Meeting Planner API">
+            <packageset dir="${src.dir}" defaultexcludes="yes">
+                <include name="edu/sc/csce747/MeetingPlanner/**"/>
+            </packageset>
+            <classpath refid="classpath"/>
+            <doctitle><![CDATA[<h1>Meeting Planner System</h1>]]></doctitle>
+            <bottom><![CDATA[<i>Copyright © 2024 Meeting Planner Team. All Rights Reserved.</i>]]></bottom>
+        </javadoc>
+    </target>
+
+    <!-- Create JAR distribution -->
+    <target name="dist" depends="compile, test">
+        <jar destfile="${dist.dir}/meeting-planner.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="edu.sc.csce747.MeetingPlanner.PlannerInterface"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- Main build target -->
+    <target name="build" depends="clean, dist, javadoc">
+        <echo message="Build completed successfully!"/>
+    </target>
+
+    <!-- Quick build without tests -->
+    <target name="quick-build" depends="clean, compile, javadoc">
+        <echo message="Quick build completed!"/>
+    </target>
+</project>
